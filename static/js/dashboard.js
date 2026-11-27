@@ -36,7 +36,15 @@
       btn.classList.toggle("active", btn.getAttribute("data-page") === pageName);
     });
     pages.forEach(function (page) {
-      page.classList.toggle("active", page.id === "page-" + pageName);
+      var isMatch = page.id === "page-" + pageName;
+      page.classList.toggle("active", isMatch);
+      if (isMatch) {
+        page.querySelectorAll(".anim-stagger").forEach(function (el) {
+          el.style.animation = "none";
+          void el.offsetHeight;
+          el.style.animation = "";
+        });
+      }
     });
     if (pageName === "vault") {
       loadVaultTable();
@@ -54,6 +62,15 @@
       var el = document.getElementById("flow-" + num);
       if (el) el.classList.toggle("active", num === stepNum);
     });
+  }
+
+  function pulseKpi(id, nextText) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = nextText;
+    el.classList.remove("kpi-pop");
+    void el.offsetWidth;
+    el.classList.add("kpi-pop");
   }
 
   var allRuleBoxes = Array.prototype.slice.call(document.querySelectorAll("input[data-rule]"));
@@ -85,7 +102,8 @@
   function stageFile(file) {
     if (!file) return;
     queuedFile = file;
-    selectedLabel.textContent = file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
+    dropArea.classList.add("has-file");
+    selectedLabel.textContent = file.name + " · " + (file.size / 1024).toFixed(1) + " KB";
     btnProcess.disabled = false;
     procStatus.textContent = "Queued";
     setFlowStep(1);
@@ -98,13 +116,14 @@
     var pagesCount = aud.pages != null ? aud.pages : 1;
     var latency = aud.latency_ms != null ? aud.latency_ms : 0;
 
+    dropArea.classList.remove("scanning");
     setFlowStep(3);
     procStatus.textContent = "Completed";
 
-    document.getElementById("out-masked").textContent = masked;
-    document.getElementById("out-pages").textContent = pagesCount;
-    document.getElementById("out-ms").textContent = latency + " ms";
-    document.getElementById("out-mode").textContent = job.mode || "local-preview";
+    pulseKpi("out-masked", String(masked));
+    pulseKpi("out-pages", String(pagesCount));
+    pulseKpi("out-ms", latency + " ms");
+    pulseKpi("out-mode", job.mode || "local-preview");
 
     document.getElementById("view-title").textContent = job.filename;
     document.getElementById("view-sub").textContent = job.timestamp + " · " + masked + " redacted item(s)";
@@ -129,8 +148,8 @@
       document.getElementById("audit-detail").innerHTML =
         "<span class=\"audit-placeholder\">Total masked entities: " + masked + ".</span>";
     } else {
-      document.getElementById("audit-detail").innerHTML = findings.map(function (f) {
-        return "<span class=\"finding-pill\">p." + f.page + " · " + f.type + " · " + f.sample + "</span>";
+      document.getElementById("audit-detail").innerHTML = findings.map(function (f, idx) {
+        return "<span class=\"finding-pill\" style=\"animation-delay:" + Math.min(idx * 25, 250) + "ms\">p." + f.page + " · " + f.type + " · " + f.sample + "</span>";
       }).join("");
     }
   }
@@ -138,6 +157,7 @@
   function processQueuedPdf() {
     if (!queuedFile) return;
     setFlowStep(2);
+    dropArea.classList.add("scanning");
     procStatus.textContent = "Processing";
     btnProcess.disabled = true;
 
@@ -150,6 +170,7 @@
       .then(function (res) { return res.json(); })
       .then(function (data) {
         btnProcess.disabled = false;
+        dropArea.classList.remove("scanning");
         if (data.error) {
           alert(data.error);
           procStatus.textContent = "Error";
@@ -160,6 +181,7 @@
       })
       .catch(function (err) {
         btnProcess.disabled = false;
+        dropArea.classList.remove("scanning");
         procStatus.textContent = "Error";
         setFlowStep(1);
         alert("Processing error: " + err);

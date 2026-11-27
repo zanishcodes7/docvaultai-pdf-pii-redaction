@@ -6,11 +6,13 @@
   <title>DocvaultAI — Document PII Redaction Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
   <div class="curtain" id="curtain" aria-hidden="true"></div>
+  <div class="ambient-glow ambient-a" aria-hidden="true"></div>
+  <div class="ambient-glow ambient-b" aria-hidden="true"></div>
 
   <header class="topbar">
     <div class="topbar-inner">
@@ -46,7 +48,7 @@
 
   <main class="shell">
     <section class="page-view active" id="page-studio">
-      <div class="hero-strip anim-in">
+      <div class="hero-strip anim-stagger" style="--d: 0ms">
         <div>
           <span class="eyebrow">Privacy Pipeline</span>
           <h1 class="hero-title">Redact sensitive fields before data moves downstream.</h1>
@@ -77,7 +79,7 @@
       </div>
 
       <div class="studio-layout">
-        <div class="panel ingest-panel anim-in">
+        <div class="panel ingest-panel anim-stagger" style="--d: 80ms">
           <div class="panel-head">
             <div>
               <h2>Ingest &amp; Redaction Policy</h2>
@@ -89,30 +91,33 @@
           <div class="ingest-grid">
             <div class="dropzone" id="drop-area" tabindex="0" role="button" aria-label="Upload PDF file">
               <input type="file" id="pdf-input" accept="application/pdf" hidden>
+              <div class="scan-beam" aria-hidden="true"></div>
               <div class="drop-badge">&#8593;</div>
               <p class="drop-title">Drop your PDF here, or <span>browse files</span></p>
-              <p class="drop-meta" id="selected-file-label">PDF up to local memory limit</p>
+              <p class="drop-meta" id="selected-file-label">Ready for PDF upload · Local memory mode</p>
             </div>
 
             <div class="policy-box">
-              <div class="policy-label">Active PII Detections</div>
-              <div class="rule-pills">
-                <label class="rule-chip">
-                  <input type="checkbox" data-rule="emails" checked>
-                  <span>Emails</span>
-                </label>
-                <label class="rule-chip">
-                  <input type="checkbox" data-rule="phones" checked>
-                  <span>Phone Numbers</span>
-                </label>
-                <label class="rule-chip">
-                  <input type="checkbox" data-rule="ids" checked>
-                  <span>CNIC / National IDs</span>
-                </label>
-                <label class="rule-chip">
-                  <input type="checkbox" data-rule="cards" checked>
-                  <span>Cards &amp; IBANs</span>
-                </label>
+              <div>
+                <div class="policy-label">Active PII Detections</div>
+                <div class="rule-pills">
+                  <label class="rule-chip">
+                    <input type="checkbox" data-rule="emails" checked>
+                    <span>Emails</span>
+                  </label>
+                  <label class="rule-chip">
+                    <input type="checkbox" data-rule="phones" checked>
+                    <span>Phone Numbers</span>
+                  </label>
+                  <label class="rule-chip">
+                    <input type="checkbox" data-rule="ids" checked>
+                    <span>CNIC / National IDs</span>
+                  </label>
+                  <label class="rule-chip">
+                    <input type="checkbox" data-rule="cards" checked>
+                    <span>Cards &amp; IBANs</span>
+                  </label>
+                </div>
               </div>
 
               <div class="field-group">
@@ -127,7 +132,7 @@
           </div>
         </div>
 
-        <div class="panel output-panel anim-in" id="output-card">
+        <div class="panel output-panel anim-stagger" style="--d: 160ms" id="output-card">
           <div class="panel-head">
             <div>
               <h2 id="view-title">Side-by-Side Output</h2>
@@ -189,7 +194,7 @@
           </div>
         </div>
 
-        <div class="panel history-panel anim-in" id="history-drawer">
+        <div class="panel history-panel anim-stagger" style="--d: 220ms" id="history-drawer">
           <div class="panel-head compact">
             <div>
               <h2>Recent Runs</h2>
@@ -206,7 +211,7 @@
     </section>
 
     <section class="page-view" id="page-rules">
-      <div class="panel anim-in">
+      <div class="panel anim-stagger" style="--d: 0ms">
         <div class="panel-head">
           <div>
             <h2>Redaction Rulebook</h2>
@@ -248,7 +253,7 @@
     </section>
 
     <section class="page-view" id="page-vault">
-      <div class="panel anim-in">
+      <div class="panel anim-stagger" style="--d: 0ms">
         <div class="panel-head">
           <div>
             <h2>Audit Log</h2>
@@ -281,7 +286,7 @@
 
     <section class="page-view" id="page-pipeline">
       <div class="pipeline-grid">
-        <div class="panel anim-in">
+        <div class="panel anim-stagger" style="--d: 0ms">
           <div class="panel-head">
             <div>
               <h2>S3 &amp; SQS Endpoint</h2>
@@ -296,7 +301,7 @@
           </div>
         </div>
 
-        <div class="panel anim-in">
+        <div class="panel anim-stagger" style="--d: 90ms">
           <div class="panel-head">
             <div>
               <h2>Pipeline Modules</h2>
