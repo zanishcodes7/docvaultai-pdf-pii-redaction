@@ -1,23 +1,12 @@
 (function () {
   var root = document.documentElement;
-  var curtain = document.getElementById("curtain");
   var themeBtn = document.getElementById("theme-btn");
   var themeIcon = document.getElementById("theme-icon");
   var themeText = document.getElementById("theme-text");
 
-  function triggerCurtain(cb) {
-    curtain.classList.add("active");
-    setTimeout(function () {
-      if (typeof cb === "function") cb();
-    }, 130);
-    setTimeout(function () {
-      curtain.classList.remove("active");
-    }, 300);
-  }
-
   function applyTheme(mode) {
     root.setAttribute("data-theme", mode);
-    localStorage.setItem("dv_page_theme", mode);
+    localStorage.setItem("dv_studio_theme", mode);
     if (mode === "light") {
       themeIcon.innerHTML = "&#9789;";
       themeText.textContent = "Daylight";
@@ -26,38 +15,34 @@
       themeText.textContent = "Nightfall";
     }
   }
-  applyTheme(localStorage.getItem("dv_page_theme") || "light");
+  applyTheme(localStorage.getItem("dv_studio_theme") || "light");
 
   themeBtn.addEventListener("click", function () {
-    triggerCurtain(function () {
-      applyTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
-    });
+    applyTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
   });
 
   var navTabs = Array.prototype.slice.call(document.querySelectorAll(".nav-tab[data-page]"));
   var panels = Array.prototype.slice.call(document.querySelectorAll(".page-panel"));
 
   function navigateTo(pageName) {
-    triggerCurtain(function () {
-      navTabs.forEach(function (tab) {
-        tab.classList.toggle("active", tab.getAttribute("data-page") === pageName);
-      });
-      panels.forEach(function (panel) {
-        var active = panel.id === "page-" + pageName;
-        panel.classList.toggle("active", active);
-        if (active) {
-          panel.querySelectorAll(".anim-card").forEach(function (card) {
-            card.style.animation = "none";
-            void card.offsetHeight;
-            card.style.animation = "";
-          });
-        }
-      });
-      window.scrollTo({ top: 0, behavior: "instant" });
-      if (pageName === "vault") {
-        loadVaultTable();
+    navTabs.forEach(function (tab) {
+      tab.classList.toggle("active", tab.getAttribute("data-page") === pageName);
+    });
+    panels.forEach(function (panel) {
+      var isTarget = panel.id === "page-" + pageName;
+      panel.classList.toggle("active", isTarget);
+      if (isTarget) {
+        panel.querySelectorAll(".anim-enter").forEach(function (el) {
+          el.style.animation = "none";
+          void el.offsetHeight;
+          el.style.animation = "";
+        });
       }
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (pageName === "vault") {
+      loadVaultTable();
+    }
   }
 
   navTabs.forEach(function (tab) {
@@ -76,9 +61,31 @@
     navigateTo("process");
   });
 
-  Array.prototype.slice.call(document.querySelectorAll(".mini-stage[data-jump]")).forEach(function (el) {
-    el.addEventListener("click", function () {
-      navigateTo(el.getAttribute("data-jump"));
+  /* 3D POINTER TILT ON HERO SHOWCASE & CARDS */
+  var heroTilt = document.getElementById("hero-3d-tilt");
+  if (heroTilt) {
+    heroTilt.addEventListener("mousemove", function (e) {
+      var r = heroTilt.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5;
+      var y = (e.clientY - r.top) / r.height - 0.5;
+      heroTilt.style.transform =
+        "perspective(900px) rotateY(" + (x * 16).toFixed(2) + "deg) rotateX(" + (-y * 14).toFixed(2) + "deg) translateZ(8px)";
+    });
+    heroTilt.addEventListener("mouseleave", function () {
+      heroTilt.style.transform = "";
+    });
+  }
+
+  Array.prototype.slice.call(document.querySelectorAll(".bento-card, .metric-box, .rule-card")).forEach(function (card) {
+    card.addEventListener("mousemove", function (e) {
+      var r = card.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5;
+      var y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform =
+        "perspective(800px) rotateY(" + (x * 8).toFixed(2) + "deg) rotateX(" + (-y * 8).toFixed(2) + "deg) translateY(-3px)";
+    });
+    card.addEventListener("mouseleave", function () {
+      card.style.transform = "";
     });
   });
 
@@ -86,9 +93,9 @@
   ruleBoxes.forEach(function (box) {
     box.addEventListener("change", function () {
       var rule = box.getAttribute("data-rule");
-      var state = box.checked;
+      var checked = box.checked;
       ruleBoxes.forEach(function (other) {
-        if (other.getAttribute("data-rule") === rule) other.checked = state;
+        if (other.getAttribute("data-rule") === rule) other.checked = checked;
       });
     });
   });
@@ -112,21 +119,21 @@
   function stagePdf(file) {
     if (!file) return;
     queuedFile = file;
-    var info = file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
+    var label = file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
     dropArea.classList.add("has-file");
-    selectedLabel.textContent = "Staged: " + info;
-    uploadReadyText.textContent = info + " — ready for redaction";
+    selectedLabel.textContent = "Staged: " + label;
+    uploadReadyText.textContent = label + " — ready on Process page";
     btnProcess.disabled = false;
     procStatus.textContent = "File Staged";
   }
 
-  function animateStat(id, val) {
+  function popStat(id, text) {
     var el = document.getElementById(id);
     if (!el) return;
-    el.textContent = val;
-    el.classList.remove("pop-num");
+    el.textContent = text;
+    el.classList.remove("pop-stat");
     void el.offsetWidth;
-    el.classList.add("pop-num");
+    el.classList.add("pop-stat");
   }
 
   function renderJobOutput(job) {
@@ -139,10 +146,10 @@
     dropArea.classList.remove("scanning");
     procStatus.textContent = "Completed";
 
-    animateStat("out-masked", String(masked));
-    animateStat("out-pages", String(pagesCount));
-    animateStat("out-ms", ms + " ms");
-    animateStat("out-mode", job.mode || "local-preview");
+    popStat("out-masked", String(masked));
+    popStat("out-pages", String(pagesCount));
+    popStat("out-ms", ms + " ms");
+    popStat("out-mode", job.mode || "local-preview");
 
     document.getElementById("view-title").textContent = job.filename;
     document.getElementById("view-sub").textContent = job.timestamp + " · " + masked + " masked entity/entities";
@@ -165,10 +172,10 @@
     var findings = aud.findings || [];
     if (!findings.length) {
       document.getElementById("audit-detail").innerHTML =
-        "<span class=\"muted-note\">Total masked entities: " + masked + ".</span>";
+        "<span class=\"muted-text\">Total masked entities: " + masked + ".</span>";
     } else {
       document.getElementById("audit-detail").innerHTML = findings.map(function (f) {
-        return "<span class=\"finding-badge\">p." + f.page + " · " + f.type + " · " + f.sample + "</span>";
+        return "<span class=\"finding-pill\">p." + f.page + " · " + f.type + " · " + f.sample + "</span>";
       }).join("");
     }
   }
@@ -230,7 +237,7 @@
 
   function renderHistory(jobs) {
     if (!jobs || !jobs.length) {
-      jobsList.innerHTML = "<div class=\"muted-note\">No saved PDF runs.</div>";
+      jobsList.innerHTML = "<div class=\"muted-text\">No saved PDF runs.</div>";
       return;
     }
     jobsList.innerHTML = "";
@@ -240,7 +247,7 @@
       row.className = "history-row";
       row.innerHTML =
         "<div><strong>" + j.filename + "</strong> <small>(" + j.timestamp + ")</small></div>" +
-        "<span class=\"status-badge\">" + masked + " masked</span>";
+        "<span class=\"status-chip\">" + masked + " masked</span>";
       row.addEventListener("click", function () {
         renderJobOutput(j);
         document.getElementById("output-card").scrollIntoView({ behavior: "smooth" });
@@ -303,14 +310,14 @@
     fetchOverview(function (jobs) {
       var tbody = document.getElementById("vault-tbody");
       if (!jobs.length) {
-        tbody.innerHTML = "<tr><td colspan=\"6\" class=\"muted-note\">No documents in history.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan=\"6\" class=\"muted-text\">No documents in history.</td></tr>";
         return;
       }
       tbody.innerHTML = jobs.map(function (j) {
         var aud = j.audit || {};
         return "<tr>" +
           "<td><strong>" + j.filename + "</strong></td>" +
-          "<td><span class=\"status-badge\">" + (aud.total_redacted || 0) + "</span></td>" +
+          "<td><span class=\"status-chip\">" + (aud.total_redacted || 0) + "</span></td>" +
           "<td>" + (aud.pages || 1) + "</td>" +
           "<td>" + (aud.latency_ms || 0) + " ms</td>" +
           "<td>" + j.mode + "</td>" +

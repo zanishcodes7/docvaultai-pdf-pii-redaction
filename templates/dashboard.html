@@ -3,28 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DocvaultAI — PII Redaction &amp; Data Privacy Pipeline</title>
+  <title>DocvaultAI — Document PII Redaction &amp; Cloud Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
-  <div class="page-curtain" id="curtain" aria-hidden="true"></div>
-  <div class="ambient-orb orb-left" aria-hidden="true"></div>
-  <div class="ambient-orb orb-right" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="glow-blob glow-a" aria-hidden="true"></div>
+  <div class="glow-blob glow-b" aria-hidden="true"></div>
 
   <header class="topbar">
     <div class="topbar-inner">
       <button type="button" class="brand-btn" data-page="home">
-        <span class="brand-badge" aria-hidden="true"><span></span></span>
-        <span class="brand-text">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-label">
           <strong>Docvault<b>AI</b></strong>
-          <small>Data Privacy &amp; Redaction</small>
+          <small>Privacy Pipeline Studio</small>
         </span>
       </button>
 
-      <nav class="nav-pill-group" aria-label="Main pages">
+      <nav class="nav-pill-group" aria-label="Main navigation">
         <button type="button" class="nav-tab active" data-page="home">Home</button>
         <button type="button" class="nav-tab" data-page="upload">Upload</button>
         <button type="button" class="nav-tab" data-page="process">Process</button>
@@ -46,116 +46,100 @@
     </div>
   </header>
 
-  <main class="workspace">
-    <!-- PAGE 1: HOME (WHAT WE DO & WHAT THIS WEBSITE IS FOR) -->
+  <main class="stage-viewport">
+    <!-- PAGE 1: HOME -->
     <section class="page-panel active" id="page-home">
-      <div class="home-hero anim-card" style="--delay: 0ms">
-        <div class="hero-left">
-          <span class="tag-pill">Automated PII Redaction &amp; Cloud Pipeline</span>
-          <h1>Sanitize sensitive PDFs before they enter downstream systems.</h1>
-          <p class="hero-lead">
-            <strong>DocvaultAI</strong> is a data privacy and document engineering workflow built with Python, Flask, PyMuPDF, Docker, and local AWS S3/SQS emulation (Floci). It automatically finds and permanently masks sensitive entities—such as emails, phone numbers, CNIC/national IDs, payment cards/IBANs, and custom terms—while logging audit metadata and supporting both cloud-emulated and local fallback execution.
+      <div class="hero-card card-3d anim-enter" style="--delay: 0ms">
+        <div class="hero-copy">
+          <span class="eyebrow-tag">Data Engineering &amp; Document Privacy</span>
+          <h1>Redact sensitive fields before data moves downstream.</h1>
+          <p class="hero-desc">
+            <strong>DocvaultAI</strong> turns raw, sensitive PDFs into privacy-safe documents and structured audit records. Built with Python, Flask, PyMuPDF, Docker, and Floci (local AWS S3 &amp; SQS emulation), it detects and permanently masks emails, phone numbers, CNIC/IDs, payment cards/IBANs, and custom keywords—with automatic local fallback when Floci is offline.
           </p>
-          <div class="hero-cta-row">
-            <button type="button" class="btn-orange" id="go-upload-btn">Start with Upload &#8594;</button>
-            <button type="button" class="btn-tint" id="go-process-btn">Go to Process &amp; Output</button>
+          <div class="hero-actions">
+            <button type="button" class="btn-orange" id="go-upload-btn">Upload PDF &#8594;</button>
+            <button type="button" class="btn-tint" id="go-process-btn">Open Process Studio</button>
           </div>
         </div>
 
-        <div class="hero-visual">
-          <div class="flow-card-stack">
-            <div class="mini-stage active" data-jump="upload">
-              <span class="stage-num">01</span>
-              <div>
-                <strong>Upload Page</strong>
-                <small>Stage source PDF &amp; inspect file size</small>
-              </div>
-              <span class="stage-arrow">&#8594;</span>
+        <div class="hero-3d-stage" aria-hidden="true">
+          <div class="mock-3d-back"></div>
+          <div class="mock-3d-front" id="hero-3d-tilt">
+            <div class="mock-top">
+              <span class="mock-dot"></span>
+              <span class="mock-dot"></span>
+              <span class="mock-dot active"></span>
+              <small>pii-redaction-engine</small>
             </div>
-            <div class="mini-stage" data-jump="process">
-              <span class="stage-num">02</span>
-              <div>
-                <strong>Process Page</strong>
-                <small>Apply PII rules, run redaction &amp; compare PDFs</small>
-              </div>
-              <span class="stage-arrow">&#8594;</span>
-            </div>
-            <div class="mini-stage" data-jump="pipeline">
-              <span class="stage-num">03</span>
-              <div>
-                <strong>S3 / SQS &amp; Audit</strong>
-                <small>Track pipeline status, latency &amp; history</small>
-              </div>
-              <span class="stage-arrow">&#8594;</span>
+            <div class="mock-body">
+              <div class="mock-line w-70"></div>
+              <div class="mock-redact-bar">MASKED · EMAIL / CNIC / IBAN</div>
+              <div class="mock-line w-85"></div>
+              <div class="mock-redact-bar tint">S3 RAW &rarr; REDACTED &rarr; SQS</div>
+              <div class="mock-line w-55"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="info-grid">
-        <article class="info-card anim-card" style="--delay: 80ms">
-          <span class="card-kicker">What We Do</span>
-          <h2>Automated PDF PII Redaction</h2>
-          <p>
-            Unstructured PDFs like invoices, reports, applications, and records often contain sensitive personal or financial details. DocvaultAI scans PDF pages and permanently redacts matched emails, phone numbers, CNIC/IDs, card/IBAN numbers, and custom keywords.
-          </p>
+      <div class="bento-3">
+        <article class="bento-card card-3d anim-enter" style="--delay: 70ms">
+          <span class="bento-num">01</span>
+          <h2>What We Do</h2>
+          <p>Automatically detect and permanently mask PII—emails, phones, national IDs/CNICs, card/IBAN numbers, and custom terms—inside multi-page PDFs.</p>
         </article>
 
-        <article class="info-card anim-card" style="--delay: 140ms">
-          <span class="card-kicker">Why This Website Exists</span>
-          <h2>Safe, Verifiable Data Engineering</h2>
-          <p>
-            Instead of manually editing documents or guessing what got masked, this studio gives you a clear workflow: upload a document on one page, run and compare the original vs. redacted PDF on the next, and inspect entity counts, execution time, and audit logs.
-          </p>
+        <article class="bento-card card-3d anim-enter" style="--delay: 130ms">
+          <span class="bento-num">02</span>
+          <h2>What This Platform Is For</h2>
+          <p>Keep unstructured documents safe before analytics, storage, or sharing, with side-by-side original vs. redacted previews, entity counts, and audit logs.</p>
         </article>
 
-        <article class="info-card anim-card" style="--delay: 200ms">
-          <span class="card-kicker">Cloud &amp; Local Resilience</span>
-          <h2>S3, SQS &amp; Local Fallback</h2>
-          <p>
-            When Dockerized Floci is running on port 4566, raw and redacted artifacts interact with S3 buckets and SQS queues. When Floci is offline, DocvaultAI automatically switches to local preview mode so you can still redact and export PDFs without interruption.
-          </p>
+        <article class="bento-card card-3d anim-enter" style="--delay: 190ms">
+          <span class="bento-num">03</span>
+          <h2>How The Pipeline Works</h2>
+          <p>Connects with S3 buckets and SQS queues via Dockerized Floci on port 4566, and seamlessly falls back to local preview mode if Floci is stopped.</p>
         </article>
       </div>
     </section>
 
     <!-- PAGE 2: DEDICATED UPLOAD PAGE -->
     <section class="page-panel" id="page-upload">
-      <div class="page-banner anim-card" style="--delay: 0ms">
+      <div class="section-head anim-enter" style="--delay: 0ms">
         <div>
-          <span class="tag-pill">Step 01 · Ingest</span>
+          <span class="eyebrow-tag">Step 01 · Ingest</span>
           <h2>Upload Source PDF</h2>
-          <p>Select or drag-and-drop a PDF file here, then head to the Process page to redact and inspect it.</p>
+          <p>Drop or select your PDF file here, then continue to the Process page to run redaction.</p>
         </div>
-        <span class="status-badge" id="proc-status">Standby</span>
+        <span class="status-chip" id="proc-status">Standby</span>
       </div>
 
-      <div class="surface-box anim-card" style="--delay: 90ms">
+      <div class="glass-panel card-3d anim-enter" style="--delay: 80ms">
         <div class="drop-zone" id="drop-area" tabindex="0" role="button" aria-label="Upload PDF file">
           <input type="file" id="pdf-input" accept="application/pdf" hidden>
-          <div class="scan-line" aria-hidden="true"></div>
-          <div class="upload-circle">&#8679;</div>
-          <p class="drop-heading">Drag &amp; drop your PDF here, or <span>browse from computer</span></p>
-          <p class="drop-subtext" id="selected-file-label">No PDF selected yet · Supports .pdf files</p>
+          <div class="scan-beam" aria-hidden="true"></div>
+          <div class="upload-badge">&#8679;</div>
+          <p class="drop-title">Drop your PDF here, or <span>browse from computer</span></p>
+          <p class="drop-meta" id="selected-file-label">No PDF selected yet · Ready for local upload</p>
         </div>
 
-        <div class="next-step-bar">
-          <div class="staged-summary">
-            <span>Current Upload State:</span>
+        <div class="upload-footer-bar">
+          <div>
+            <small>Staged Document</small>
             <strong id="upload-ready-text">Waiting for a PDF file</strong>
           </div>
-          <button type="button" class="btn-orange" id="btn-continue-process">Continue to Process Page &#8594;</button>
+          <button type="button" class="btn-orange" id="btn-continue-process">Continue to Process &#8594;</button>
         </div>
       </div>
     </section>
 
-    <!-- PAGE 3: DEDICATED PROCESS & OUTPUT PAGE -->
+    <!-- PAGE 3: DEDICATED PROCESS PAGE -->
     <section class="page-panel" id="page-process">
-      <div class="page-banner anim-card" style="--delay: 0ms">
+      <div class="section-head anim-enter" style="--delay: 0ms">
         <div>
-          <span class="tag-pill">Step 02 · Redact &amp; Compare</span>
-          <h2>Process PDF &amp; Inspect Output</h2>
-          <p>Configure redaction rules and custom keywords, run the redaction engine, and compare original vs. redacted PDFs.</p>
+          <span class="eyebrow-tag">Step 02 · Redact &amp; Compare</span>
+          <h2>Process &amp; Redaction Studio</h2>
+          <p>Choose redaction rules, add custom terms, run PyMuPDF redaction, and compare outputs.</p>
         </div>
         <div class="action-group" id="dl-group" style="display:none">
           <a class="btn-outline" id="dl-raw" href="#" download>Original PDF</a>
@@ -163,102 +147,102 @@
         </div>
       </div>
 
-      <div class="surface-box anim-card" style="--delay: 70ms">
-        <div class="process-controls">
-          <div class="rules-cluster">
-            <label class="check-pill"><input type="checkbox" data-rule="emails" checked><span>Emails</span></label>
-            <label class="check-pill"><input type="checkbox" data-rule="phones" checked><span>Phones</span></label>
-            <label class="check-pill"><input type="checkbox" data-rule="ids" checked><span>CNIC / IDs</span></label>
-            <label class="check-pill"><input type="checkbox" data-rule="cards" checked><span>Cards / IBAN</span></label>
+      <div class="glass-panel card-3d anim-enter" style="--delay: 70ms">
+        <div class="controls-stack">
+          <div class="rules-row">
+            <label class="rule-toggle"><input type="checkbox" data-rule="emails" checked><span>Emails</span></label>
+            <label class="rule-toggle"><input type="checkbox" data-rule="phones" checked><span>Phone Numbers</span></label>
+            <label class="rule-toggle"><input type="checkbox" data-rule="ids" checked><span>CNIC / IDs</span></label>
+            <label class="rule-toggle"><input type="checkbox" data-rule="cards" checked><span>Cards &amp; IBAN</span></label>
           </div>
-          <div class="run-row">
-            <input type="text" id="custom-kw" class="input-field" placeholder="Custom words to redact (comma-separated)">
+          <div class="run-bar">
+            <input type="text" id="custom-kw" class="text-field" placeholder="Custom words to redact (comma-separated)">
             <button type="button" class="btn-orange" id="btn-process" disabled>Run Redaction</button>
           </div>
         </div>
       </div>
 
-      <div class="surface-box anim-card" style="--delay: 140ms" id="output-card">
-        <div class="output-meta-head">
+      <div class="glass-panel anim-enter" style="--delay: 140ms" id="output-card">
+        <div class="output-header">
           <div>
-            <h3 id="view-title">Side-by-Side Redaction Preview</h3>
-            <p id="view-sub">Upload a PDF on the Upload page and click Run Redaction to generate output.</p>
+            <h3 id="view-title">Side-by-Side Comparison</h3>
+            <p id="view-sub">Stage a PDF on the Upload page and run redaction to inspect results.</p>
           </div>
         </div>
 
-        <div class="stats-grid">
-          <div class="stat-tile"><span>Entities Masked</span><strong id="out-masked">0</strong></div>
-          <div class="stat-tile"><span>Pages</span><strong id="out-pages">0</strong></div>
-          <div class="stat-tile"><span>Engine Time</span><strong id="out-ms">0 ms</strong></div>
-          <div class="stat-tile"><span>Mode</span><strong id="out-mode">Standby</strong></div>
+        <div class="metric-row">
+          <div class="metric-box card-3d"><span>Entities Masked</span><strong id="out-masked">0</strong></div>
+          <div class="metric-box card-3d"><span>Pages</span><strong id="out-pages">0</strong></div>
+          <div class="metric-box card-3d"><span>Engine Time</span><strong id="out-ms">0 ms</strong></div>
+          <div class="metric-box card-3d"><span>Mode</span><strong id="out-mode">Standby</strong></div>
         </div>
 
-        <div class="compare-grid">
-          <div class="pdf-pane">
-            <div class="pdf-pane-bar"><span>Original Input PDF</span><small>Source</small></div>
+        <div class="viewer-grid">
+          <div class="viewer-box">
+            <div class="viewer-bar"><span>Original Input PDF</span><small>Source</small></div>
             <iframe id="pdf-raw" title="Original Input PDF"></iframe>
           </div>
-          <div class="pdf-pane">
-            <div class="pdf-pane-bar tinted"><span>Final Redacted PDF</span><small>Masked</small></div>
+          <div class="viewer-box">
+            <div class="viewer-bar accent"><span>Final Redacted PDF</span><small>Masked</small></div>
             <iframe id="pdf-redacted" title="Final Redacted Output PDF"></iframe>
           </div>
         </div>
 
-        <div class="audit-strip">
-          <div class="breakdown-chips" id="counts-row">
+        <div class="audit-box">
+          <div class="breakdown-pills" id="counts-row">
             <span>Emails <b>0</b></span>
             <span>Phones <b>0</b></span>
             <span>CNIC/IDs <b>0</b></span>
             <span>Cards/IBAN <b>0</b></span>
             <span>Custom <b>0</b></span>
           </div>
-          <div class="findings-wrap" id="audit-detail">
-            <span class="muted-note">No redaction audit generated yet.</span>
+          <div class="findings-pills" id="audit-detail">
+            <span class="muted-text">No redaction audit generated yet.</span>
           </div>
         </div>
       </div>
 
-      <div class="surface-box anim-card" style="--delay: 200ms" id="history-drawer">
-        <div class="history-top">
+      <div class="glass-panel anim-enter" style="--delay: 200ms" id="history-drawer">
+        <div class="history-header">
           <div>
             <h3>Processed PDF History</h3>
-            <p>Hidden on initial load until you choose to view past runs.</p>
+            <p>Hidden on load until you choose to inspect past runs.</p>
           </div>
           <div class="action-group">
             <button type="button" class="btn-outline" id="btn-toggle-history">Show History</button>
             <button type="button" class="btn-outline" id="btn-clear-history" style="display:none">Clear</button>
           </div>
         </div>
-        <div class="history-items" id="jobs-list" style="display:none"></div>
+        <div class="history-list" id="jobs-list" style="display:none"></div>
       </div>
     </section>
 
     <!-- PAGE 4: RULES -->
     <section class="page-panel" id="page-rules">
-      <div class="page-banner anim-card" style="--delay: 0ms">
+      <div class="section-head anim-enter" style="--delay: 0ms">
         <div>
-          <span class="tag-pill">Policy</span>
+          <span class="eyebrow-tag">Policy</span>
           <h2>Redaction Rules &amp; Filters</h2>
-          <p>Toggles here stay synchronized with the Process page.</p>
+          <p>Changes stay synchronized with the Process page.</p>
         </div>
-        <span class="status-badge">Synced</span>
+        <span class="status-chip">Live Sync</span>
       </div>
 
-      <div class="rules-two-col anim-card" style="--delay: 80ms">
-        <label class="rule-box"><input type="checkbox" data-rule="emails" checked><div><strong>Email Addresses</strong><span>Masks email strings across all PDF pages.</span></div></label>
-        <label class="rule-box"><input type="checkbox" data-rule="phones" checked><div><strong>Phone Numbers</strong><span>Masks phone and mobile numbers.</span></div></label>
-        <label class="rule-box"><input type="checkbox" data-rule="ids" checked><div><strong>CNIC / National IDs</strong><span>Masks national IDs, SSNs, and ID numbers.</span></div></label>
-        <label class="rule-box"><input type="checkbox" data-rule="cards" checked><div><strong>Cards &amp; IBANs</strong><span>Masks payment card numbers and IBAN strings.</span></div></label>
+      <div class="two-col anim-enter" style="--delay: 80ms">
+        <label class="rule-card card-3d"><input type="checkbox" data-rule="emails" checked><div><strong>Email Addresses</strong><span>Masks email addresses across all pages.</span></div></label>
+        <label class="rule-card card-3d"><input type="checkbox" data-rule="phones" checked><div><strong>Phone Numbers</strong><span>Masks formatted and raw phone numbers.</span></div></label>
+        <label class="rule-card card-3d"><input type="checkbox" data-rule="ids" checked><div><strong>CNIC / National IDs</strong><span>Masks national identity numbers and IDs.</span></div></label>
+        <label class="rule-card card-3d"><input type="checkbox" data-rule="cards" checked><div><strong>Cards &amp; IBANs</strong><span>Masks card numbers and IBAN strings.</span></div></label>
       </div>
     </section>
 
     <!-- PAGE 5: AUDIT LOG -->
     <section class="page-panel" id="page-vault">
-      <div class="page-banner anim-card" style="--delay: 0ms">
+      <div class="section-head anim-enter" style="--delay: 0ms">
         <div>
-          <span class="tag-pill">Records</span>
+          <span class="eyebrow-tag">Records</span>
           <h2>Vault Audit Log</h2>
-          <p>History of processed files, masked entity counts, latency, and modes.</p>
+          <p>Recorded redaction runs, masked counts, latency, and runtime modes.</p>
         </div>
         <div class="action-group">
           <button type="button" class="btn-outline" id="btn-vault-refresh">Refresh</button>
@@ -266,8 +250,8 @@
         </div>
       </div>
 
-      <div class="surface-box anim-card" style="--delay: 80ms">
-        <div class="table-wrap">
+      <div class="glass-panel anim-enter" style="--delay: 80ms">
+        <div class="table-scroll">
           <table class="audit-table">
             <thead>
               <tr>
@@ -280,7 +264,7 @@
               </tr>
             </thead>
             <tbody id="vault-tbody">
-              <tr><td colspan="6" class="muted-note">No history loaded.</td></tr>
+              <tr><td colspan="6" class="muted-text">No history loaded.</td></tr>
             </tbody>
           </table>
         </div>
@@ -289,27 +273,27 @@
 
     <!-- PAGE 6: PIPELINE -->
     <section class="page-panel" id="page-pipeline">
-      <div class="page-banner anim-card" style="--delay: 0ms">
+      <div class="section-head anim-enter" style="--delay: 0ms">
         <div>
-          <span class="tag-pill">Infrastructure</span>
+          <span class="eyebrow-tag">Infrastructure</span>
           <h2>Floci S3 / SQS &amp; Worker Modules</h2>
-          <p>Local cloud emulation status and worker components in the repository.</p>
+          <p>Local cloud emulation status and background worker components.</p>
         </div>
-        <span class="status-badge" id="pipe-mode-pill">Checking</span>
+        <span class="status-chip" id="pipe-mode-pill">Checking</span>
       </div>
 
-      <div class="pipeline-two-col">
-        <div class="surface-box anim-card" style="--delay: 80ms">
+      <div class="two-col">
+        <div class="glass-panel card-3d anim-enter" style="--delay: 80ms">
           <h3>Floci Endpoint</h3>
-          <div class="kv-rows">
+          <div class="kv-list">
             <div><span>Endpoint</span><strong id="kv-ep">http://localhost:4566</strong></div>
             <div><span>Queue Depth</span><strong id="kv-q">0</strong></div>
             <div><span>Buckets</span><strong id="kv-b">None</strong></div>
           </div>
         </div>
-        <div class="surface-box anim-card" style="--delay: 140ms">
-          <h3>Worker &amp; Setup Files</h3>
-          <div class="file-chips">
+        <div class="glass-panel card-3d anim-enter" style="--delay: 140ms">
+          <h3>Worker &amp; Setup Modules</h3>
+          <div class="module-list">
             <code>worker/consumer.py</code>
             <code>worker/db.py</code>
             <code>worker/redaction_engine.py</code>
