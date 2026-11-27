@@ -15,7 +15,7 @@
       themeText.textContent = "Nightfall";
     }
   }
-  applyTheme(localStorage.getItem("dv_studio_theme") || "light");
+  applyTheme(localStorage.getItem("dv_studio_theme") || "dark");
 
   themeBtn.addEventListener("click", function () {
     applyTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
@@ -61,33 +61,74 @@
     navigateTo("process");
   });
 
-  /* 3D POINTER TILT ON HERO SHOWCASE & CARDS */
+  /* CONTINUOUS ANIMATED FLOW RIBBON ON RIGHT HERO STAGE */
+  var canvas = document.getElementById("wave-canvas");
   var heroTilt = document.getElementById("hero-3d-tilt");
+  var pointerX = 0;
+  var pointerY = 0;
+
   if (heroTilt) {
-    heroTilt.addEventListener("mousemove", function (e) {
-      var r = heroTilt.getBoundingClientRect();
-      var x = (e.clientX - r.left) / r.width - 0.5;
-      var y = (e.clientY - r.top) / r.height - 0.5;
-      heroTilt.style.transform =
-        "perspective(900px) rotateY(" + (x * 16).toFixed(2) + "deg) rotateX(" + (-y * 14).toFixed(2) + "deg) translateZ(8px)";
+    var stageEl = heroTilt.parentElement;
+    stageEl.addEventListener("mousemove", function (e) {
+      var r = stageEl.getBoundingClientRect();
+      pointerX = (e.clientX - r.left) / r.width - 0.5;
+      pointerY = (e.clientY - r.top) / r.height - 0.5;
     });
-    heroTilt.addEventListener("mouseleave", function () {
-      heroTilt.style.transform = "";
+    stageEl.addEventListener("mouseleave", function () {
+      pointerX = 0;
+      pointerY = 0;
     });
   }
 
-  Array.prototype.slice.call(document.querySelectorAll(".bento-card, .metric-box, .rule-card")).forEach(function (card) {
-    card.addEventListener("mousemove", function (e) {
-      var r = card.getBoundingClientRect();
-      var x = (e.clientX - r.left) / r.width - 0.5;
-      var y = (e.clientY - r.top) / r.height - 0.5;
-      card.style.transform =
-        "perspective(800px) rotateY(" + (x * 8).toFixed(2) + "deg) rotateX(" + (-y * 8).toFixed(2) + "deg) translateY(-3px)";
-    });
-    card.addEventListener("mouseleave", function () {
-      card.style.transform = "";
-    });
-  });
+  var t = 0;
+  function animateStage() {
+    t += 0.018;
+
+    if (heroTilt) {
+      var idleY = Math.sin(t * 0.7) * 3.5;
+      var idleX = Math.cos(t * 0.55) * 2.2;
+      var rotY = (pointerX * 14 + idleY).toFixed(2);
+      var rotX = (-pointerY * 12 + idleX).toFixed(2);
+      heroTilt.style.transform =
+        "perspective(950px) rotateY(" + rotY + "deg) rotateX(" + rotX + "deg)";
+    }
+
+    if (canvas && canvas.parentElement) {
+      var w = canvas.parentElement.clientWidth;
+      var h = canvas.parentElement.clientHeight;
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+      var ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, w, h);
+
+      // Ribbon 1: Warm orange (#FA9019) flowing wave
+      ctx.beginPath();
+      for (var x = 0; x <= w; x += 8) {
+        var y1 = h * 0.52 + Math.sin(x * 0.015 + t) * 26 + Math.cos(x * 0.008 - t * 0.7) * 14;
+        if (x === 0) ctx.moveTo(x, y1);
+        else ctx.lineTo(x, y1);
+      }
+      ctx.strokeStyle = "rgba(250, 144, 25, 0.36)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Ribbon 2: Cool blue tint (#B6C9CF) counter-wave
+      ctx.beginPath();
+      for (var x2 = 0; x2 <= w; x2 += 8) {
+        var y2 = h * 0.46 + Math.cos(x2 * 0.013 - t * 1.1) * 24 + Math.sin(x2 * 0.009 + t * 0.6) * 12;
+        if (x2 === 0) ctx.moveTo(x2, y2);
+        else ctx.lineTo(x2, y2);
+      }
+      ctx.strokeStyle = "rgba(182, 201, 207, 0.32)";
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+
+    requestAnimationFrame(animateStage);
+  }
+  animateStage();
 
   var ruleBoxes = Array.prototype.slice.call(document.querySelectorAll("input[data-rule]"));
   ruleBoxes.forEach(function (box) {

@@ -49,12 +49,12 @@
   <main class="stage-viewport">
     <!-- PAGE 1: HOME -->
     <section class="page-panel active" id="page-home">
-      <div class="hero-card card-3d anim-enter" style="--delay: 0ms">
+      <div class="hero-card anim-enter" style="--delay: 0ms">
         <div class="hero-copy">
           <span class="eyebrow-tag">Data Engineering &amp; Document Privacy</span>
           <h1>Redact sensitive fields before data moves downstream.</h1>
           <p class="hero-desc">
-            <strong>DocvaultAI</strong> turns raw, sensitive PDFs into privacy-safe documents and structured audit records. Built with Python, Flask, PyMuPDF, Docker, and Floci (local AWS S3 &amp; SQS emulation), it detects and permanently masks emails, phone numbers, CNIC/IDs, payment cards/IBANs, and custom keywords—with automatic local fallback when Floci is offline.
+            <strong>DocvaultAI</strong> is an end-to-end PDF privacy and data pipeline studio built with Python, Flask, PyMuPDF, Docker, and Floci (local AWS S3 &amp; SQS emulation). Organizations constantly handle PDFs—invoices, onboarding forms, financial statements, legal records, and compliance reports—containing sensitive information like emails, phone numbers, CNIC/national IDs, card/IBAN numbers, and confidential terms. DocvaultAI detects and permanently masks those entities, generates a structured audit breakdown, and tracks pipeline health with automatic fallback to local preview mode when Floci is offline.
           </p>
           <div class="hero-actions">
             <button type="button" class="btn-orange" id="go-upload-btn">Upload PDF &#8594;</button>
@@ -63,6 +63,7 @@
         </div>
 
         <div class="hero-3d-stage" aria-hidden="true">
+          <canvas id="wave-canvas" class="wave-canvas"></canvas>
           <div class="mock-3d-back"></div>
           <div class="mock-3d-front" id="hero-3d-tilt">
             <div class="mock-top">
@@ -72,10 +73,23 @@
               <small>pii-redaction-engine</small>
             </div>
             <div class="mock-body">
+              <div class="stream-pill-row">
+                <span class="stream-badge">PDF INGEST</span>
+                <span class="stream-connector"></span>
+                <span class="stream-badge accent">PYMUPDF MASK</span>
+                <span class="stream-connector"></span>
+                <span class="stream-badge tint">S3 / SQS</span>
+              </div>
               <div class="mock-line w-70"></div>
-              <div class="mock-redact-bar">MASKED · EMAIL / CNIC / IBAN</div>
+              <div class="mock-redact-bar">
+                <span>MASKED · EMAIL / PHONE / CNIC / IBAN</span>
+                <i class="bar-sheen"></i>
+              </div>
               <div class="mock-line w-85"></div>
-              <div class="mock-redact-bar tint">S3 RAW &rarr; REDACTED &rarr; SQS</div>
+              <div class="mock-redact-bar tint">
+                <span>AUDIT TELEMETRY · LATENCY &amp; COUNTS</span>
+                <i class="bar-sheen"></i>
+              </div>
               <div class="mock-line w-55"></div>
             </div>
           </div>
@@ -84,22 +98,56 @@
 
       <div class="bento-3">
         <article class="bento-card card-3d anim-enter" style="--delay: 70ms">
-          <span class="bento-num">01</span>
-          <h2>What We Do</h2>
-          <p>Automatically detect and permanently mask PII—emails, phones, national IDs/CNICs, card/IBAN numbers, and custom terms—inside multi-page PDFs.</p>
+          <span class="bento-num">01 · WHAT WE DO</span>
+          <h2>Automated PDF PII Redaction</h2>
+          <p>
+            DocvaultAI inspects every page of an uploaded PDF using Python and PyMuPDF (<code>fitz</code>) to locate and permanently redact sensitive patterns—including email addresses, phone/mobile numbers, CNIC and national ID formats, credit card/IBAN numbers, and any custom comma-separated keywords you specify—before files are shared or ingested into downstream workflows.
+          </p>
         </article>
 
         <article class="bento-card card-3d anim-enter" style="--delay: 130ms">
-          <span class="bento-num">02</span>
-          <h2>What This Platform Is For</h2>
-          <p>Keep unstructured documents safe before analytics, storage, or sharing, with side-by-side original vs. redacted previews, entity counts, and audit logs.</p>
+          <span class="bento-num">02 · WHAT THIS WEBSITE IS FOR</span>
+          <h2>Verifiable Privacy &amp; Side-by-Side Review</h2>
+          <p>
+            Designed as a multi-page engineering studio rather than a black-box script, this platform lets you stage files on the <strong>Upload</strong> page, configure rules and run redaction on the <strong>Process</strong> page, view original vs. redacted PDFs side by side, inspect masked entity counts and execution latency, export clean PDFs, and review job history in the <strong>Audit Log</strong>.
+          </p>
         </article>
 
         <article class="bento-card card-3d anim-enter" style="--delay: 190ms">
-          <span class="bento-num">03</span>
-          <h2>How The Pipeline Works</h2>
-          <p>Connects with S3 buckets and SQS queues via Dockerized Floci on port 4566, and seamlessly falls back to local preview mode if Floci is stopped.</p>
+          <span class="bento-num">03 · CLOUD &amp; WORKER ARCHITECTURE</span>
+          <h2>Floci S3 / SQS With Local Fallback</h2>
+          <p>
+            The <strong>Pipeline</strong> view monitors local AWS emulation via Floci (port 4566), surfacing configured buckets, queue depth, and modular worker components (<code>worker/consumer.py</code>, <code>worker/db.py</code>, <code>worker/redaction_engine.py</code>, <code>scripts/init_aws.py</code>). Whenever Floci is stopped or unreachable, the app seamlessly falls back to local preview mode so testing and demos stay smooth.
+          </p>
         </article>
+      </div>
+
+      <div class="workflow-deep-card anim-enter" style="--delay: 250ms">
+        <div class="deep-head">
+          <div>
+            <span class="eyebrow-tag">End-to-End Lifecycle</span>
+            <h2>How Data Moves Through DocvaultAI</h2>
+            <p>Each step is separated cleanly so you can upload, configure, redact, audit, and verify infrastructure without clutter.</p>
+          </div>
+        </div>
+        <div class="lifecycle-grid">
+          <div class="lifecycle-step">
+            <strong>1. Stage on Upload</strong>
+            <span>Select or drag a source PDF and verify file size before moving to processing.</span>
+          </div>
+          <div class="lifecycle-step">
+            <strong>2. Apply Policy &amp; Mask</strong>
+            <span>Toggle PII categories (Emails, Phones, CNIC/IDs, Cards/IBAN) and add custom terms.</span>
+          </div>
+          <div class="lifecycle-step">
+            <strong>3. Compare &amp; Export</strong>
+            <span>Inspect original and redacted PDFs side by side, check counts, and download outputs.</span>
+          </div>
+          <div class="lifecycle-step">
+            <strong>4. Audit &amp; Monitor</strong>
+            <span>Review past runs in the Audit Log and check Floci S3/SQS status in Pipeline.</span>
+          </div>
+        </div>
       </div>
     </section>
 
