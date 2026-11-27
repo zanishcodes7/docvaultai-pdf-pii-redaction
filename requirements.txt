@@ -1,0 +1,5 @@
+boto3
+python-dotenv
+pymupdf
+flask
+psycopg2-binary

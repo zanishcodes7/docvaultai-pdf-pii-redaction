@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="positivus">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DocvaultAI — PDF Redaction Workflow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+  <div class="curtain" id="curtain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-box">&#10022;</div>
+      <div>
+        <h1>Docvault<b>AI</b></h1>
+        <span>PDF Redaction Studio</span>
+      </div>
+    </div>
+
+    <nav class="main-nav" aria-label="Primary pages">
+      <button type="button" class="nav-link active" data-page="studio">Studio</button>
+      <button type="button" class="nav-link" data-page="rules">Rules &amp; Filters</button>
+      <button type="button" class="nav-link" data-page="vault">Vault History</button>
+      <button type="button" class="nav-link" data-page="pipeline">Pipeline</button>
+    </nav>
+
+    <div class="top-right">
+      <div class="status-chip" id="pipe-chip">
+        <i class="dot"></i>
+        <span id="pipe-label">Checking Floci...</span>
+      </div>
+      <button type="button" class="theme-btn" id="theme-btn">
+        <span id="theme-icon">&#9789;</span>
+        <span id="theme-text">Redo Orange</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-view active" id="page-studio">
+      <div class="flow-banner anim-up">
+        <div class="flow-step active" id="flow-1">
+          <span class="num">01</span>
+          <div><strong>Upload PDF</strong><small>Select or drop source PDF</small></div>
+        </div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-step" id="flow-2">
+          <span class="num">02</span>
+          <div><strong>Process &amp; Mask</strong><small>S3 / SQS &amp; PII redaction</small></div>
+        </div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-step" id="flow-3">
+          <span class="num">03</span>
+          <div><strong>Final Output</strong><small>Inspect &amp; download redacted PDF</small></div>
+        </div>
+      </div>
+
+      <div class="workflow-stack">
+        <div class="card stage-card anim-up">
+          <div class="card-hd">
+            <div>
+              <h2>1 &amp; 2. Upload &amp; Process PDF</h2>
+              <p class="view-sub">Select a PDF file and choose which sensitive fields to redact</p>
+            </div>
+            <span class="lime-badge" id="proc-status">Idle</span>
+          </div>
+
+          <div class="upload-row">
+            <div class="drop-area" id="drop-area">
+              <input type="file" id="pdf-input" accept="application/pdf" hidden>
+              <div class="up-icon">&#8679;</div>
+              <p class="up-main">Drop PDF here or <span>browse file</span></p>
+              <p class="up-sub" id="selected-file-label">No file selected yet</p>
+            </div>
+
+            <div class="process-side">
+              <div class="mini-rules">
+                <label><input type="checkbox" data-rule="emails" checked> Emails</label>
+                <label><input type="checkbox" data-rule="phones" checked> Phones</label>
+                <label><input type="checkbox" data-rule="ids" checked> CNIC / IDs</label>
+                <label><input type="checkbox" data-rule="cards" checked> Cards / IBAN</label>
+              </div>
+              <input type="text" id="custom-kw" class="kw-input" placeholder="Custom words to redact (comma-separated)">
+              <button type="button" class="btn-primary" id="btn-process" disabled>Process PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card output-card anim-up" id="output-card">
+          <div class="card-hd">
+            <div>
+              <h2 id="view-title">3. Final Redacted Output</h2>
+              <p class="view-sub" id="view-sub">Process a PDF above to inspect original and redacted output</p>
+            </div>
+            <div class="dl-group" id="dl-group" style="display:none">
+              <a class="btn-ghost" id="dl-raw" href="#" download>Original PDF</a>
+              <a class="btn-primary" id="dl-redacted" href="#" download>Download Final PDF</a>
+            </div>
+          </div>
+
+          <div class="out-metrics">
+            <div class="metric-pill"><span>Redacted Entities</span><strong id="out-masked">0</strong></div>
+            <div class="metric-pill"><span>Pages</span><strong id="out-pages">0</strong></div>
+            <div class="metric-pill"><span>Engine Time</span><strong id="out-ms">0 ms</strong></div>
+            <div class="metric-pill"><span>Pipeline Mode</span><strong id="out-mode">Standby</strong></div>
+          </div>
+
+          <div class="dual-view">
+            <div class="viewer">
+              <div class="viewer-top">Original Input PDF</div>
+              <iframe id="pdf-raw" title="Original Input PDF"></iframe>
+            </div>
+            <div class="viewer">
+              <div class="viewer-top">Final Redacted Output PDF</div>
+              <iframe id="pdf-redacted" title="Final Redacted Output PDF"></iframe>
+            </div>
+          </div>
+
+          <div class="audit-box">
+            <div class="counts-row" id="counts-row">
+              <span>Emails: <b>0</b></span>
+              <span>Phones: <b>0</b></span>
+              <span>CNIC/IDs: <b>0</b></span>
+              <span>Cards/IBAN: <b>0</b></span>
+              <span>Custom: <b>0</b></span>
+            </div>
+            <div class="audit-detail" id="audit-detail">No redaction audit generated yet.</div>
+          </div>
+        </div>
+
+        <div class="card history-drawer anim-up" id="history-drawer">
+          <div class="card-hd">
+            <div>
+              <h2>Processed PDF History</h2>
+              <p class="view-sub">Hidden on initial load until you choose to view past runs</p>
+            </div>
+            <div class="dl-group">
+              <button type="button" class="btn-ghost" id="btn-toggle-history">Show History</button>
+              <button type="button" class="btn-ghost" id="btn-clear-history" style="display:none">Clear</button>
+            </div>
+          </div>
+          <div class="jobs-list" id="jobs-list" style="display:none"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-view" id="page-rules">
+      <div class="card anim-up">
+        <div class="card-hd">
+          <div>
+            <h2>Redaction Policy &amp; Rules</h2>
+            <p class="view-sub">Rules sync directly with the Studio processor</p>
+          </div>
+          <span class="lime-badge">Synced</span>
+        </div>
+        <div class="rules-grid-lg">
+          <label class="rule-tile"><input type="checkbox" data-rule="emails" checked> <div><strong>Email Addresses</strong><span>Masks email strings across all PDF pages</span></div></label>
+          <label class="rule-tile"><input type="checkbox" data-rule="phones" checked> <div><strong>Phone Numbers</strong><span>Masks phone &amp; mobile numbers</span></div></label>
+          <label class="rule-tile"><input type="checkbox" data-rule="ids" checked> <div><strong>CNIC / IDs</strong><span>Masks national IDs, SSNs &amp; 13-digit IDs</span></div></label>
+          <label class="rule-tile"><input type="checkbox" data-rule="cards" checked> <div><strong>Cards &amp; IBANs</strong><span>Masks card numbers &amp; IBANs</span></div></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-view" id="page-vault">
+      <div class="card anim-up">
+        <div class="card-hd">
+          <div>
+            <h2>Vault History</h2>
+            <p class="view-sub">Audit log of processed documents</p>
+          </div>
+          <div class="dl-group">
+            <button type="button" class="btn-ghost" id="btn-vault-refresh">Refresh</button>
+            <button type="button" class="btn-ghost" id="btn-vault-clear">Clear Log</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="vault-table">
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Masked</th>
+                <th>Pages</th>
+                <th>Time</th>
+                <th>Mode</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="vault-tbody">
+              <tr><td colspan="6" class="muted-empty">No history loaded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-view" id="page-pipeline">
+      <div class="pipeline-cards">
+        <div class="card anim-up">
+          <div class="card-hd"><h2>Floci S3 &amp; SQS</h2><span class="lime-badge" id="pipe-mode-pill">Checking</span></div>
+          <div class="kv-list">
+            <div><span>Endpoint</span><strong id="kv-ep">http://localhost:4566</strong></div>
+            <div><span>Queue Depth</span><strong id="kv-q">0</strong></div>
+            <div><span>Buckets</span><strong id="kv-b">None</strong></div>
+          </div>
+        </div>
+        <div class="card anim-up">
+          <div class="card-hd"><h2>Worker Files</h2><span class="lime-badge">DocvaultAI</span></div>
+          <div class="mod-list">
+            <code>worker/consumer.py</code>
+            <code>worker/db.py</code>
+            <code>worker/redaction_engine.py</code>
+            <code>scripts/init_aws.py</code>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
