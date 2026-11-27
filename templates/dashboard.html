@@ -1,197 +1,278 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="positivus">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DocvaultAI — PDF Redaction Workflow</title>
+  <title>DocvaultAI — Document PII Redaction Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
   <div class="curtain" id="curtain" aria-hidden="true"></div>
 
   <header class="topbar">
-    <div class="brand">
-      <div class="logo-box">&#10022;</div>
-      <div>
-        <h1>Docvault<b>AI</b></h1>
-        <span>PDF Redaction Studio</span>
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span>
+        </div>
+        <div class="brand-copy">
+          <div class="brand-title">Docvault<b>AI</b></div>
+          <p>Document Privacy &amp; Redaction Studio</p>
+        </div>
       </div>
-    </div>
 
-    <nav class="main-nav" aria-label="Primary pages">
-      <button type="button" class="nav-link active" data-page="studio">Studio</button>
-      <button type="button" class="nav-link" data-page="rules">Rules &amp; Filters</button>
-      <button type="button" class="nav-link" data-page="vault">Vault History</button>
-      <button type="button" class="nav-link" data-page="pipeline">Pipeline</button>
-    </nav>
+      <nav class="main-nav" aria-label="Workspace sections">
+        <button type="button" class="nav-link active" data-page="studio">Studio</button>
+        <button type="button" class="nav-link" data-page="rules">Rules</button>
+        <button type="button" class="nav-link" data-page="vault">Audit Log</button>
+        <button type="button" class="nav-link" data-page="pipeline">Pipeline</button>
+      </nav>
 
-    <div class="top-right">
-      <div class="status-chip" id="pipe-chip">
-        <i class="dot"></i>
-        <span id="pipe-label">Checking Floci...</span>
+      <div class="top-actions">
+        <div class="status-pill" id="pipe-chip" title="Local S3/SQS emulation status">
+          <span class="status-dot"></span>
+          <span id="pipe-label">Checking Floci</span>
+        </div>
+        <button type="button" class="theme-switch" id="theme-btn" aria-label="Toggle color mode">
+          <span id="theme-icon">&#9789;</span>
+          <span id="theme-text">Daylight</span>
+        </button>
       </div>
-      <button type="button" class="theme-btn" id="theme-btn">
-        <span id="theme-icon">&#9789;</span>
-        <span id="theme-text">Redo Orange</span>
-      </button>
     </div>
   </header>
 
-  <main class="container">
+  <main class="shell">
     <section class="page-view active" id="page-studio">
-      <div class="flow-banner anim-up">
-        <div class="flow-step active" id="flow-1">
-          <span class="num">01</span>
-          <div><strong>Upload PDF</strong><small>Select or drop source PDF</small></div>
+      <div class="hero-strip anim-in">
+        <div>
+          <span class="eyebrow">Privacy Pipeline</span>
+          <h1 class="hero-title">Redact sensitive fields before data moves downstream.</h1>
         </div>
-        <div class="flow-arrow">&#8594;</div>
-        <div class="flow-step" id="flow-2">
-          <span class="num">02</span>
-          <div><strong>Process &amp; Mask</strong><small>S3 / SQS &amp; PII redaction</small></div>
-        </div>
-        <div class="flow-arrow">&#8594;</div>
-        <div class="flow-step" id="flow-3">
-          <span class="num">03</span>
-          <div><strong>Final Output</strong><small>Inspect &amp; download redacted PDF</small></div>
+        <div class="stepper" role="list" aria-label="Workflow stages">
+          <div class="step-pill active" id="flow-1" role="listitem">
+            <span class="step-index">01</span>
+            <div>
+              <strong>Upload</strong>
+              <span>Source PDF</span>
+            </div>
+          </div>
+          <div class="step-pill" id="flow-2" role="listitem">
+            <span class="step-index">02</span>
+            <div>
+              <strong>Redact</strong>
+              <span>Mask &amp; Queue</span>
+            </div>
+          </div>
+          <div class="step-pill" id="flow-3" role="listitem">
+            <span class="step-index">03</span>
+            <div>
+              <strong>Inspect</strong>
+              <span>Compare &amp; Export</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="workflow-stack">
-        <div class="card stage-card anim-up">
-          <div class="card-hd">
+      <div class="studio-layout">
+        <div class="panel ingest-panel anim-in">
+          <div class="panel-head">
             <div>
-              <h2>1 &amp; 2. Upload &amp; Process PDF</h2>
-              <p class="view-sub">Select a PDF file and choose which sensitive fields to redact</p>
+              <h2>Ingest &amp; Redaction Policy</h2>
+              <p>Drop a PDF document, choose PII rules, and run redaction.</p>
             </div>
-            <span class="lime-badge" id="proc-status">Idle</span>
+            <span class="badge-tag" id="proc-status">Standby</span>
           </div>
 
-          <div class="upload-row">
-            <div class="drop-area" id="drop-area">
+          <div class="ingest-grid">
+            <div class="dropzone" id="drop-area" tabindex="0" role="button" aria-label="Upload PDF file">
               <input type="file" id="pdf-input" accept="application/pdf" hidden>
-              <div class="up-icon">&#8679;</div>
-              <p class="up-main">Drop PDF here or <span>browse file</span></p>
-              <p class="up-sub" id="selected-file-label">No file selected yet</p>
+              <div class="drop-badge">&#8593;</div>
+              <p class="drop-title">Drop your PDF here, or <span>browse files</span></p>
+              <p class="drop-meta" id="selected-file-label">PDF up to local memory limit</p>
             </div>
 
-            <div class="process-side">
-              <div class="mini-rules">
-                <label><input type="checkbox" data-rule="emails" checked> Emails</label>
-                <label><input type="checkbox" data-rule="phones" checked> Phones</label>
-                <label><input type="checkbox" data-rule="ids" checked> CNIC / IDs</label>
-                <label><input type="checkbox" data-rule="cards" checked> Cards / IBAN</label>
+            <div class="policy-box">
+              <div class="policy-label">Active PII Detections</div>
+              <div class="rule-pills">
+                <label class="rule-chip">
+                  <input type="checkbox" data-rule="emails" checked>
+                  <span>Emails</span>
+                </label>
+                <label class="rule-chip">
+                  <input type="checkbox" data-rule="phones" checked>
+                  <span>Phone Numbers</span>
+                </label>
+                <label class="rule-chip">
+                  <input type="checkbox" data-rule="ids" checked>
+                  <span>CNIC / National IDs</span>
+                </label>
+                <label class="rule-chip">
+                  <input type="checkbox" data-rule="cards" checked>
+                  <span>Cards &amp; IBANs</span>
+                </label>
               </div>
-              <input type="text" id="custom-kw" class="kw-input" placeholder="Custom words to redact (comma-separated)">
-              <button type="button" class="btn-primary" id="btn-process" disabled>Process PDF</button>
+
+              <div class="field-group">
+                <label class="field-label" for="custom-kw">Custom Terms (comma-separated)</label>
+                <input type="text" id="custom-kw" class="text-input" placeholder="e.g., account number, confidential, internal">
+              </div>
+
+              <div class="action-bar">
+                <button type="button" class="btn-solid" id="btn-process" disabled>Run Redaction</button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="card output-card anim-up" id="output-card">
-          <div class="card-hd">
+        <div class="panel output-panel anim-in" id="output-card">
+          <div class="panel-head">
             <div>
-              <h2 id="view-title">3. Final Redacted Output</h2>
-              <p class="view-sub" id="view-sub">Process a PDF above to inspect original and redacted output</p>
+              <h2 id="view-title">Side-by-Side Output</h2>
+              <p id="view-sub">Processed documents appear here with full redaction telemetry.</p>
             </div>
-            <div class="dl-group" id="dl-group" style="display:none">
-              <a class="btn-ghost" id="dl-raw" href="#" download>Original PDF</a>
-              <a class="btn-primary" id="dl-redacted" href="#" download>Download Final PDF</a>
+            <div class="btn-row" id="dl-group" style="display:none">
+              <a class="btn-outline" id="dl-raw" href="#" download>Original</a>
+              <a class="btn-solid" id="dl-redacted" href="#" download>Export Redacted PDF</a>
             </div>
           </div>
 
-          <div class="out-metrics">
-            <div class="metric-pill"><span>Redacted Entities</span><strong id="out-masked">0</strong></div>
-            <div class="metric-pill"><span>Pages</span><strong id="out-pages">0</strong></div>
-            <div class="metric-pill"><span>Engine Time</span><strong id="out-ms">0 ms</strong></div>
-            <div class="metric-pill"><span>Pipeline Mode</span><strong id="out-mode">Standby</strong></div>
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <span class="kpi-label">Entities Masked</span>
+              <strong class="kpi-value" id="out-masked">0</strong>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Pages Scanned</span>
+              <strong class="kpi-value" id="out-pages">0</strong>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Execution Time</span>
+              <strong class="kpi-value" id="out-ms">0 ms</strong>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">Runtime Mode</span>
+              <strong class="kpi-value" id="out-mode">Standby</strong>
+            </div>
           </div>
 
-          <div class="dual-view">
-            <div class="viewer">
-              <div class="viewer-top">Original Input PDF</div>
+          <div class="preview-grid">
+            <div class="frame-card">
+              <div class="frame-header">
+                <span>Original Document</span>
+                <small>Source</small>
+              </div>
               <iframe id="pdf-raw" title="Original Input PDF"></iframe>
             </div>
-            <div class="viewer">
-              <div class="viewer-top">Final Redacted Output PDF</div>
+            <div class="frame-card">
+              <div class="frame-header accent">
+                <span>Redacted Output</span>
+                <small>Sanitized</small>
+              </div>
               <iframe id="pdf-redacted" title="Final Redacted Output PDF"></iframe>
             </div>
           </div>
 
-          <div class="audit-box">
-            <div class="counts-row" id="counts-row">
-              <span>Emails: <b>0</b></span>
-              <span>Phones: <b>0</b></span>
-              <span>CNIC/IDs: <b>0</b></span>
-              <span>Cards/IBAN: <b>0</b></span>
-              <span>Custom: <b>0</b></span>
+          <div class="audit-panel">
+            <div class="breakdown-strip" id="counts-row">
+              <span>Emails <b>0</b></span>
+              <span>Phones <b>0</b></span>
+              <span>CNIC / IDs <b>0</b></span>
+              <span>Cards / IBAN <b>0</b></span>
+              <span>Custom <b>0</b></span>
             </div>
-            <div class="audit-detail" id="audit-detail">No redaction audit generated yet.</div>
+            <div class="findings-list" id="audit-detail">
+              <span class="audit-placeholder">No findings recorded yet.</span>
+            </div>
           </div>
         </div>
 
-        <div class="card history-drawer anim-up" id="history-drawer">
-          <div class="card-hd">
+        <div class="panel history-panel anim-in" id="history-drawer">
+          <div class="panel-head compact">
             <div>
-              <h2>Processed PDF History</h2>
-              <p class="view-sub">Hidden on initial load until you choose to view past runs</p>
+              <h2>Recent Runs</h2>
+              <p>Loaded on demand so your workspace stays uncluttered.</p>
             </div>
-            <div class="dl-group">
-              <button type="button" class="btn-ghost" id="btn-toggle-history">Show History</button>
-              <button type="button" class="btn-ghost" id="btn-clear-history" style="display:none">Clear</button>
+            <div class="btn-row">
+              <button type="button" class="btn-outline" id="btn-toggle-history">Show Runs</button>
+              <button type="button" class="btn-outline" id="btn-clear-history" style="display:none">Clear</button>
             </div>
           </div>
-          <div class="jobs-list" id="jobs-list" style="display:none"></div>
+          <div class="runs-list" id="jobs-list" style="display:none"></div>
         </div>
       </div>
     </section>
 
     <section class="page-view" id="page-rules">
-      <div class="card anim-up">
-        <div class="card-hd">
+      <div class="panel anim-in">
+        <div class="panel-head">
           <div>
-            <h2>Redaction Policy &amp; Rules</h2>
-            <p class="view-sub">Rules sync directly with the Studio processor</p>
+            <h2>Redaction Rulebook</h2>
+            <p>Changes stay synchronized with the active Studio run configuration.</p>
           </div>
-          <span class="lime-badge">Synced</span>
+          <span class="badge-tag">Live Sync</span>
         </div>
-        <div class="rules-grid-lg">
-          <label class="rule-tile"><input type="checkbox" data-rule="emails" checked> <div><strong>Email Addresses</strong><span>Masks email strings across all PDF pages</span></div></label>
-          <label class="rule-tile"><input type="checkbox" data-rule="phones" checked> <div><strong>Phone Numbers</strong><span>Masks phone &amp; mobile numbers</span></div></label>
-          <label class="rule-tile"><input type="checkbox" data-rule="ids" checked> <div><strong>CNIC / IDs</strong><span>Masks national IDs, SSNs &amp; 13-digit IDs</span></div></label>
-          <label class="rule-tile"><input type="checkbox" data-rule="cards" checked> <div><strong>Cards &amp; IBANs</strong><span>Masks card numbers &amp; IBANs</span></div></label>
+        <div class="rulebook-grid">
+          <label class="rulebook-card">
+            <input type="checkbox" data-rule="emails" checked>
+            <div>
+              <strong>Email Addresses</strong>
+              <span>Detects and masks email strings across all pages.</span>
+            </div>
+          </label>
+          <label class="rulebook-card">
+            <input type="checkbox" data-rule="phones" checked>
+            <div>
+              <strong>Phone &amp; Mobile Numbers</strong>
+              <span>Detects formatted and unformatted phone numbers.</span>
+            </div>
+          </label>
+          <label class="rulebook-card">
+            <input type="checkbox" data-rule="ids" checked>
+            <div>
+              <strong>CNIC &amp; National IDs</strong>
+              <span>Detects national identity numbers, SSNs, and ID sequences.</span>
+            </div>
+          </label>
+          <label class="rulebook-card">
+            <input type="checkbox" data-rule="cards" checked>
+            <div>
+              <strong>Payment Cards &amp; IBANs</strong>
+              <span>Detects bank card numbers and IBAN identifiers.</span>
+            </div>
+          </label>
         </div>
       </div>
     </section>
 
     <section class="page-view" id="page-vault">
-      <div class="card anim-up">
-        <div class="card-hd">
+      <div class="panel anim-in">
+        <div class="panel-head">
           <div>
-            <h2>Vault History</h2>
-            <p class="view-sub">Audit log of processed documents</p>
+            <h2>Audit Log</h2>
+            <p>Recorded redaction jobs, latency metrics, and execution modes.</p>
           </div>
-          <div class="dl-group">
-            <button type="button" class="btn-ghost" id="btn-vault-refresh">Refresh</button>
-            <button type="button" class="btn-ghost" id="btn-vault-clear">Clear Log</button>
+          <div class="btn-row">
+            <button type="button" class="btn-outline" id="btn-vault-refresh">Refresh</button>
+            <button type="button" class="btn-outline" id="btn-vault-clear">Clear Log</button>
           </div>
         </div>
-        <div class="table-wrap">
-          <table class="vault-table">
+        <div class="table-scroll">
+          <table class="data-table">
             <thead>
               <tr>
                 <th>Document</th>
                 <th>Masked</th>
                 <th>Pages</th>
-                <th>Time</th>
+                <th>Latency</th>
                 <th>Mode</th>
                 <th>Timestamp</th>
               </tr>
             </thead>
             <tbody id="vault-tbody">
-              <tr><td colspan="6" class="muted-empty">No history loaded.</td></tr>
+              <tr><td colspan="6" class="empty-cell">No audit entries loaded.</td></tr>
             </tbody>
           </table>
         </div>
@@ -199,18 +280,31 @@
     </section>
 
     <section class="page-view" id="page-pipeline">
-      <div class="pipeline-cards">
-        <div class="card anim-up">
-          <div class="card-hd"><h2>Floci S3 &amp; SQS</h2><span class="lime-badge" id="pipe-mode-pill">Checking</span></div>
-          <div class="kv-list">
-            <div><span>Endpoint</span><strong id="kv-ep">http://localhost:4566</strong></div>
-            <div><span>Queue Depth</span><strong id="kv-q">0</strong></div>
-            <div><span>Buckets</span><strong id="kv-b">None</strong></div>
+      <div class="pipeline-grid">
+        <div class="panel anim-in">
+          <div class="panel-head">
+            <div>
+              <h2>S3 &amp; SQS Endpoint</h2>
+              <p>Local Floci cloud emulation telemetry</p>
+            </div>
+            <span class="badge-tag" id="pipe-mode-pill">Checking</span>
+          </div>
+          <div class="spec-list">
+            <div class="spec-row"><span>Endpoint URL</span><strong id="kv-ep">http://localhost:4566</strong></div>
+            <div class="spec-row"><span>Queue Depth</span><strong id="kv-q">0</strong></div>
+            <div class="spec-row"><span>Configured Buckets</span><strong id="kv-b">None</strong></div>
           </div>
         </div>
-        <div class="card anim-up">
-          <div class="card-hd"><h2>Worker Files</h2><span class="lime-badge">DocvaultAI</span></div>
-          <div class="mod-list">
+
+        <div class="panel anim-in">
+          <div class="panel-head">
+            <div>
+              <h2>Pipeline Modules</h2>
+              <p>Core worker and initialization components</p>
+            </div>
+            <span class="badge-tag">Architecture</span>
+          </div>
+          <div class="code-stack">
             <code>worker/consumer.py</code>
             <code>worker/db.py</code>
             <code>worker/redaction_engine.py</code>
